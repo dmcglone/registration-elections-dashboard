@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Custom infowindow example | CartoDB.js</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+    <style>
+      html, body {
+        height: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        height: 75%;
+        padding: 0;
+        margin: 0;
+      }
+      #dashboard {
+        height: 25%;
+        padding: 25px;
+        margin: 0;
+        border-top: 2px solid #333;
+        width: 100%;
+      }
+      #chart_div {
+        float: left;
+      }
+      #chart_div2 {
+        float: left;
+      }
+      #chart_div3 {
+        float: left;
+      }
+    </style>
+
+    <link rel="stylesheet" href="http://libs.cartodb.com/cartodb.js/v3/3.11/themes/css/cartodb.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="dashboard" class="container">
+	  <div id="chart_div3" class="child"></div>
+    <div id="chart_div" class="child"></div>
+    <div id="chart_div2" class="child"></div>
+    </div>
+    <script type="infowindow/html" id="infowindow_template">
+    </script>
+
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="http://libs.cartodb.com/cartodb.js/v3/3.15/cartodb.js"></script>
+
+    <script>
+      // load visualization library from google
+      google.load('visualization', '1.0', {'packages':['corechart']});
+
+      function draw_chart(data, name) {
+         var data = google.visualization.arrayToDataTable([
+            ['', 'Total'],
+            ['Democrat to Republican',  data[0]],
+            ['Republican to Democrat',  data[1]]
+         ]);
+
+
+          var options = {
+            title: name + ' Voter Registration Change',
+            legend: { position: "none" },
+            width: 300,
+            vAxis: {
+              viewWindow: {
+                min:0
+              }
+            }
+          };
+
+          var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
+
+      }
+
+      function draw_chart2(data, name) {
+         var data = google.visualization.arrayToDataTable([
+            ['', 'Total'],
+            ['Obama %',  data[2]],
+            ['Romney %',  data[3]]
+         ]);
+
+          var options = {
+            title: name + ' 2012 Election Results',
+            legend: { position: "none" },
+            width: 300,
+          };
+
+          var chart = new google.visualization.PieChart(document.getElementById('chart_div2'));
+          chart.draw(data, options);
+      }
+
+      function draw_chart3(data, name) {
+         var data = google.visualization.arrayToDataTable([
+            ['', 'Total'],
+            ['Democrats',  data[0]],
+            ['Republicans',  data[1]]
+         ]);
+
+          var options = {
+            title: name + ' Registration Totals',
+            legend: { position: "none" },
+            width: 300,
+          };
+
+          var chart = new google.visualization.PieChart(document.getElementById('chart_div3'));
+          chart.draw(data, options);
+      }
+
+      function main() {
+
+        // create map
+        var map = L.map('map', { 
+          zoomControl: true,
+          center: [41, -76.7],
+          zoom: 8,
+          layerSelector: true
+        });
+
+        // add a nice baselayer from Cartodb
+        L.tileLayer('http://{s}.api.cartocdn.com/base-light/{z}/{x}/{y}.png', {
+          attribution: 'CartoDB'
+        }).addTo(map);
+
+        cartodb.createLayer(map, 'https://azavea-maps.cartodb.com/u/azavea/api/v2/viz/a56a9d70-07ed-11e6-a8cf-0e674067d321/viz.json')
+         .addTo(map)
+         .done (function(layer) {
+			 var sublayer = layer.getSubLayer(0);
+       var sublayer0Shown = true;
+$("#sublayer0").on('click', function() {
+  if (sublayer0Shown) {
+    sublayers[0].hide();
+  } else {
+    sublayers[0].show();
+  }
+  sublayer0Shown = !sublayer0Shown; 
+});
+
+var sublayer0Shown = true;
+$("#sublayer1").on('click', function() {
+  if (sublayer0Shown) {
+    sublayers[1].hide();
+  } else {
+    sublayers[1].show();
+  }
+  sublayer0Shown = !sublayer0Shown; 
+});
+
+var sublayer0Shown = true;
+$("#sublayer2").on('click', function() {
+  if (sublayer0Shown) {
+    sublayers[2].hide();
+  } else {
+    sublayers[2].show();
+  }
+  sublayer0Shown = !sublayer0Shown; 
+});
+
+var sublayer0Shown = true;
+$("#sublayer3").on('click', function() {
+  if (sublayer0Shown) {
+    sublayers[3].hide();
+  } else {
+    sublayers[3].show();
+  }
+  sublayer0Shown = !sublayer0Shown; 
+});
+			 sublayer.setInteraction(true);
+			 sublayer.setInteractivity("cartodb_id, county, d2r, r2d, obama, romney, demtotal, reptotal");
+
+      sublayer.on('featureClick',function(e, latlng, pos, data, subLayerIndex) {
+        draw_chart2([data.d2r, data.r2d, data.obama, data.romney], data.county);
+        draw_chart([data.d2r, data.r2d], data.county);
+        draw_chart3([data.demtotal, data.reptotal], data.county);
+      });
+          }).on('error', function() {
+            console.log("some error occurred");
+          });
+      }
+
+      window.onload = main;
+    </script>
+  </body>
+</html>
